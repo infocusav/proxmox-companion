@@ -28,6 +28,9 @@ variables
 color
 catch_errors
 
+# Set default value for NEXTID if it's not already set
+NEXTID=${NEXTID:-$(($(pct list | awk '{print $1}' | sort -n | tail -n 1) + 1))}
+
 # Prompt for user input
 echo "Please provide the following details for container creation:"
 
