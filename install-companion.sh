@@ -2,7 +2,6 @@
 source <(curl -s https://raw.githubusercontent.com/tteck/Proxmox/main/misc/build.func)
 # Copyright (c) 2025 infocusav
 # License: MIT
-
 function header_info {
   clear
   cat <<"EOF"
@@ -13,7 +12,6 @@ function header_info {
                               |_|   |__/ 
 EOF
 }
-
 header_info
 echo -e "Loading..."
 APP="Proxmox Companion"
@@ -25,11 +23,9 @@ var_version="11"    # Debian version
 BRG="vmbr0"         # Bridge interface
 NET="192.168.1.200/24"  # Default IP address
 GATE="192.168.1.1"      # Default Gateway
-
 variables
 color
 catch_errors
-
 function default_settings() {
   CT_TYPE="1"        # Unprivileged container
   PW=""              # No password
@@ -51,11 +47,9 @@ function default_settings() {
   VERB="no"
   echo_default
 }
-
 start
 build_container
 description
-
 msg_ok "Completed Successfully!\n"
 echo -e "${APP}${CL} should be reachable by going to the following URL.
          ${BL}http://${IP}:80${CL} \n"
