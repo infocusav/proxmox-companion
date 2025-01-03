@@ -11,7 +11,7 @@ VMID=$CT_NUMBER
 CT_IP="192.168.100.${CT_NUMBER}"  # Simple IP logic based on container number
 
 # Validate IP address format
-if [[ ! "$CT_IP" =~ ^192\.168\.100\.[0-9]+$ ]] || [ "${CT_IP##*.}" -gt 255 ]; then
+if [[ ! "$CT_IP" =~ ^192\.168\.1\.[0-9]+$ ]] || [ "${CT_IP##*.}" -gt 255 ]; then
     echo "Invalid IP address format for $CT_IP. Please ensure the IP is in the range 192.168.100.0-255."
     exit 1
 fi
