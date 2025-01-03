@@ -28,60 +28,56 @@ variables
 color
 catch_errors
 
-function prompt_for_input() {
-  echo "Please provide the following details for the container setup:"
-  
-  # Prompt for Container ID
-  read -p "Container ID: " CT_ID
-  CT_ID=${CT_ID:-$NEXTID}  # If empty, use the NEXTID from build.func
-  
-  # Prompt for Hostname
-  read -p "Hostname (default: ${NSAPP}): " HN
-  HN=${HN:-$NSAPP}  # Default to $NSAPP if not provided
-  
-  # Prompt for Disk Size
-  read -p "Disk Size (default: 8GB): " DISK_SIZE
-  DISK_SIZE=${DISK_SIZE:-"8G"}  # Default to "8G" if not provided
-  
-  # Prompt for CPU cores
-  read -p "CPU cores (default: 2): " CORE_COUNT
-  CORE_COUNT=${CORE_COUNT:-2}  # Default to 2 if not provided
-  
-  # Prompt for RAM Size
-  read -p "RAM Size (default: 2048MB): " RAM_SIZE
-  RAM_SIZE=${RAM_SIZE:-2048}  # Default to 2048MB if not provided
-  
-  # Prompt for Bridge
-  read -p "Bridge (default: vmbr0): " BRG
-  BRG=${BRG:-"vmbr0"}  # Default to vmbr0 if not provided
-  
-  # Prompt for Network (DHCP or Static IP)
-  read -p "Network (default: dhcp): " NET
-  NET=${NET:-"dhcp"}  # Default to dhcp if not provided
+# Prompt for user input
+echo "Please provide the following details for container creation:"
 
-  # Additional optional parameters
-  read -p "Gateway (Leave empty for default): " GATE
-  read -p "Disable IPv6 (default: no): " DISABLEIP6
-  DISABLEIP6=${DISABLEIP6:-"no"}
-  
-  # Show all inputs to user
-  echo -e "\nYou entered the following details for the container setup:"
-  echo "Container ID: $CT_ID"
-  echo "Hostname: $HN"
-  echo "Disk Size: $DISK_SIZE"
-  echo "CPU cores: $CORE_COUNT"
-  echo "RAM Size: $RAM_SIZE"
-  echo "Bridge: $BRG"
-  echo "Network: $NET"
-  echo "Gateway: $GATE"
-  echo "Disable IPv6: $DISABLEIP6"
-}
+# Container ID
+read -p "Container ID (Default: $NEXTID): " CT_ID
+CT_ID=${CT_ID:-$NEXTID}  # Default to NEXTID if not provided
 
-function create_container() {
-  echo -e "\nCreating container with the provided settings..."
+# Hostname
+read -p "Hostname (Default: $NSAPP): " HN
+HN=${HN:-$NSAPP}  # Default to NSAPP if not provided
 
-  # Create Proxmox container with the user inputs
-  sudo pct create $CT_ID $STORAGE:vztmpl/$OS_TEMPLATE \
+# Disk Size
+read -p "Disk Size (Default: 8GB): " DISK_SIZE
+DISK_SIZE=${DISK_SIZE:-"8G"}  # Default to "8G" if not provided
+
+# RAM Size
+read -p "RAM Size (Default: 2048MB): " RAM_SIZE
+RAM_SIZE=${RAM_SIZE:-2048}  # Default to 2048MB if not provided
+
+# CPU Cores
+read -p "CPU Cores (Default: 2): " CORE_COUNT
+CORE_COUNT=${CORE_COUNT:-2}  # Default to 2 if not provided
+
+# Bridge
+read -p "Bridge (Default: vmbr0): " BRG
+BRG=${BRG:-"vmbr0"}  # Default to vmbr0 if not provided
+
+# Network (DHCP)
+read -p "Network (Default: dhcp): " NET
+NET=${NET:-"dhcp"}  # Default to "dhcp" if not provided
+
+# Gateway (optional)
+read -p "Gateway (Optional, leave empty for default): " GATE
+
+# Display the user's input
+echo -e "\nYou entered the following settings:"
+echo "Container ID: $CT_ID"
+echo "Hostname: $HN"
+echo "Disk Size: $DISK_SIZE"
+echo "RAM Size: $RAM_SIZE"
+echo "CPU Cores: $CORE_COUNT"
+echo "Bridge: $BRG"
+echo "Network: $NET"
+echo "Gateway: $GATE"
+
+# Build the container
+echo "Creating the container..."
+
+# Create the container
+sudo pct create $CT_ID $STORAGE:vztmpl/$OS_TEMPLATE \
     -hostname $HN \
     -rootfs $STORAGE:$DISK_SIZE \
     -net0 name=eth0,bridge=$BRG,ip=$NET \
@@ -89,15 +85,10 @@ function create_container() {
     -cores $CORE_COUNT \
     -start 1
 
-  # Wait for container to start
-  echo "Waiting for container to start..."
-  sleep 10
-}
+# Wait for the container to start
+echo "Waiting for container to start..."
+sleep 10
 
-# Run the functions
-prompt_for_input
-create_container
-
-msg_ok "Completed Successfully!\n"
+msg_ok "Container created successfully!"
 echo -e "${APP}${CL} should be reachable by going to the following URL.\n"
 echo -e "${BL}https://${IP}:8443${CL} \n"
