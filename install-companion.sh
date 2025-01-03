@@ -26,7 +26,8 @@ GATE="192.168.1.1"      # Default Gateway
 variables
 color
 catch_errors
-function default_settings() {
+
+function advanced_settings() {
   CT_TYPE="1"        # Unprivileged container
   PW=""              # No password
   CT_ID=$NEXTID      # Next available container ID
@@ -35,18 +36,19 @@ function default_settings() {
   CORE_COUNT="$var_cpu"
   RAM_SIZE="$var_ram"
   NET="ip=$NET,gw=$GATE"
-  APT_CACHER=""
-  APT_CACHER_IP=""
+  APT_CACHER="http://your-apt-cacher-url" # Advanced option for apt-cacher
+  APT_CACHER_IP="your-cacher-ip"
   DISABLEIP6="no"
-  MTU=""
-  SD=""
-  NS=""
-  MAC=""
-  VLAN=""
+  MTU="1500"
+  SD="none"
+  NS="none"
+  MAC="00:11:22:33:44:55"
+  VLAN="none"
   SSH="no"
-  VERB="no"
-  echo_default
+  VERB="yes"
+  echo_advanced
 }
+
 start
 build_container
 description
