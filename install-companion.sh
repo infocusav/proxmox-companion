@@ -1,97 +1,75 @@
 #!/usr/bin/env bash
 source <(curl -s https://raw.githubusercontent.com/tteck/Proxmox/main/misc/build.func)
-# Copyright (c) 2021-2024 tteck
-# Author: tteck (tteckster)
-# License: MIT
-# https://github.com/tteck/Proxmox/raw/main/LICENSE
 
 function header_info {
-clear
-cat <<"EOF"
-   __  __      _ _____ 
-  / / / /__   (_) __(_)
- / / / / __ \/ / /_/ / 
-/ /_/ / / / / / __/ /  
-\____/_/ /_/_/_/ /_/   
- 
+  clear
+  cat <<"EOF"
+   ___                                   
+  / __|___ _ __  ___ _ _  __ _ _ __ _  _ 
+ | (__/ _ \ '  \/ -_) ' \/ _` | '_ \ || |
+  \___\___/_|_|_\___|_||_\__,_| .__/\_, |
+                              |_|   |__/ 
 EOF
 }
-header_info
 
-if ! grep -q -m1 'avx[^ ]*' /proc/cpuinfo; then
-  echo "AVX instruction set is not supported on this CPU."
-  exit
-fi
+header_info
 echo -e "Loading..."
-APP="Container"
+APP="Proxmox Companion"
+var_disk="8"        # Disk size in GB
+var_cpu="2"         # CPU cores
+var_ram="1024"      # RAM in MB
+var_os="debian"     # OS template
+var_version="11"    # Debian version
+BRG="vmbr0"         # Bridge interface
+NET="dhcp"           # Default DHCP IP configuration
+GATE="192.168.1.1"  # Default Gateway
+
 variables
 color
 catch_errors
 
-# Set default value for NEXTID if it's not already set
-NEXTID=${NEXTID:-$(($(pct list | awk '{print $1}' | sort -n | tail -n 1) + 1))}
+# Prompt for MENU value
+read -p "Enter MENU value (default: 'default'): " MENU
+MENU="${MENU:-default}"  # Default to "default" if nothing is entered
 
-# Prompt for user input
-echo "Please provide the following details for container creation:"
+# Set template and storage
+STORAGE="local"  # Set to your actual storage (e.g., local, local-lvm)
+TEMPLATE="debian-11-standard_11.0-1_amd64.tar.gz"  # Correct template name
 
-# Container ID
-read -p "Container ID (Default: $NEXTID): " CT_ID
-CT_ID=${CT_ID:-$NEXTID}  # Default to NEXTID if not provided
+# Download the LXC template
+echo "Downloading LXC template..."
+pveam download $STORAGE $TEMPLATE || { echo "Failed to download template."; exit 1; }
 
-# Hostname
-read -p "Hostname (Default: $NSAPP): " HN
-HN=${HN:-$NSAPP}  # Default to NSAPP if not provided
+function default_settings() {
+  CT_TYPE="1"        # Unprivileged container
+  PW=""              # No password
+  CT_ID=$NEXTID      # Next available container ID
+  HN="companion"     # Hostname
+  DISK_SIZE="$var_disk"
+  CORE_COUNT="$var_cpu"
+  RAM_SIZE="$var_ram"
+  if [ "$NET" == "dhcp" ]; then
+    NET="ip=dhcp"
+  else
+    NET="ip=192.168.1.200/24,gw=$GATE"
+  fi
+  APT_CACHER=""
+  APT_CACHER_IP=""
+  DISABLEIP6="no"
+  MTU=""
+  SD=""
+  NS=""
+  MAC=""
+  VLAN=""
+  SSH="no"
+  VERB="no"
+  echo_default
+}
 
-# Disk Size
-read -p "Disk Size (Default: 8GB): " DISK_SIZE
-DISK_SIZE=${DISK_SIZE:-"8G"}  # Default to "8G" if not provided
+start
+build_container
+description
 
-# RAM Size
-read -p "RAM Size (Default: 2048MB): " RAM_SIZE
-RAM_SIZE=${RAM_SIZE:-2048}  # Default to 2048MB if not provided
-
-# CPU Cores
-read -p "CPU Cores (Default: 2): " CORE_COUNT
-CORE_COUNT=${CORE_COUNT:-2}  # Default to 2 if not provided
-
-# Bridge
-read -p "Bridge (Default: vmbr0): " BRG
-BRG=${BRG:-"vmbr0"}  # Default to vmbr0 if not provided
-
-# Network (DHCP)
-read -p "Network (Default: dhcp): " NET
-NET=${NET:-"dhcp"}  # Default to "dhcp" if not provided
-
-# Gateway (optional)
-read -p "Gateway (Optional, leave empty for default): " GATE
-
-# Display the user's input
-echo -e "\nYou entered the following settings:"
-echo "Container ID: $CT_ID"
-echo "Hostname: $HN"
-echo "Disk Size: $DISK_SIZE"
-echo "RAM Size: $RAM_SIZE"
-echo "CPU Cores: $CORE_COUNT"
-echo "Bridge: $BRG"
-echo "Network: $NET"
-echo "Gateway: $GATE"
-
-# Build the container
-echo "Creating the container..."
-
-# Create the container
-sudo pct create $CT_ID $STORAGE:vztmpl/$OS_TEMPLATE \
-    -hostname $HN \
-    -rootfs $STORAGE:$DISK_SIZE \
-    -net0 name=eth0,bridge=$BRG,ip=$NET \
-    -memory $RAM_SIZE \
-    -cores $CORE_COUNT \
-    -start 1
-
-# Wait for the container to start
-echo "Waiting for container to start..."
-sleep 10
-
-msg_ok "Container created successfully!"
-echo -e "${APP}${CL} should be reachable by going to the following IP.\n"
-echo -e "${BL}http://${IP}${CL} \n"
+msg_ok "Completed Successfully!\n"
+echo -e "${APP}${CL} should be reachable by going to the following URL.
+         ${BL}http://${IP}:80${CL} \n"
