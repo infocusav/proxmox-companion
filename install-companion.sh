@@ -44,7 +44,7 @@ function catch_errors {
 function advanced_settings {
   CT_TYPE="1"        # Unprivileged container
   PW=""              # No password
-  CT_ID=$NEXTID      # Next available container ID
+  CT_ID=101          # Manually set a valid container ID (use the next available ID if needed)
   HN="companion"     # Hostname
   DISK_SIZE="$var_disk"
   CORE_COUNT="$var_cpu"
@@ -118,5 +118,9 @@ advanced_settings
 build_container
 description
 msg_ok "Completed Successfully!\n"
+
+# Ensure correct IP is displayed for the URL
+IP="${NET%%/*}"  # Extract the IP part from the network range
+
 echo -e "${APP}${CL} should be reachable by going to the following URL.
-         ${BL}http://${NET}:80${CL} \n"
+         ${BL}http://$IP:80${CL} \n"
