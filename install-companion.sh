@@ -8,9 +8,9 @@ echo
 
 # Set the configuration for the container
 VMID=$CT_NUMBER
-CT_IP="192.168.1.${CT_NUMBER}"  # Change to use IP range 192.168.1.x
+CT_IP="192.168.1.${CT_NUMBER}"  # Set to 192.168.1.x range
 
-# Validate IP address format
+# Validate IP address format (ensure it falls in the 192.168.1.x range)
 if [[ ! "$CT_IP" =~ ^192\.168\.1\.[0-9]+$ ]] || [ "${CT_IP##*.}" -gt 255 ]; then
     echo "Invalid IP address format for $CT_IP. Please ensure the IP is in the range 192.168.1.0-255."
     exit 1
