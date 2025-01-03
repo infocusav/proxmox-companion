@@ -1,61 +1,61 @@
-#!/bin/bash
+#!/usr/bin/env bash
+source <(curl -s https://raw.githubusercontent.com/tteck/Proxmox/main/misc/build.func)
+# Copyright (c) 2025 infocusav
+# License: MIT
 
-# Check if user is root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root."
-  exit
-fi
+function header_info {
+  clear
+  cat <<"EOF"
+   ___                                   
+  / __|___ _ __  ___ _ _  __ _ _ __ _  _ 
+ | (__/ _ \ '  \/ -_) ' \/ _` | '_ \ || |
+  \___\___/_|_|_\___|_||_\__,_| .__/\_, |
+                              |_|   |__/ 
+EOF
+}
 
-# Prompt for container details with defaults
-read -p "Enter Container ID (e.g. 101): " CTID
-read -p "Enter Hostname (default: container${CTID}): " HOSTNAME
-HOSTNAME=${HOSTNAME:-container${CTID}}
+header_info
+echo -e "Loading..."
+APP="Proxmox Companion"
+var_disk="8"        # Disk size in GB
+var_cpu="2"         # CPU cores
+var_ram="1024"      # RAM in MB
+var_os="debian"     # OS template
+var_version="11"    # Debian version
+BRG="vmbr0"         # Bridge interface
+NET="192.168.1.200/24"  # Default IP address
+GATE="192.168.1.1"      # Default Gateway
 
-read -p "Enter Template name (default: local:vztmpl/debian-11-standard_11.0-1_amd64.tar.gz): " TEMPLATE
-TEMPLATE=${TEMPLATE:-local:vztmpl/debian-11-standard_11.0-1_amd64.tar.gz}
+variables
+color
+catch_errors
 
-read -p "Enter Storage (default: local-lvm): " STORAGE
-STORAGE=${STORAGE:-local-lvm}
+function default_settings() {
+  CT_TYPE="1"        # Unprivileged container
+  PW=""              # No password
+  CT_ID=$NEXTID      # Next available container ID
+  HN="companion"     # Hostname
+  DISK_SIZE="$var_disk"
+  CORE_COUNT="$var_cpu"
+  RAM_SIZE="$var_ram"
+  NET="ip=$NET,gw=$GATE"
+  APT_CACHER=""
+  APT_CACHER_IP=""
+  DISABLEIP6="no"
+  MTU=""
+  SD=""
+  NS=""
+  MAC=""
+  VLAN=""
+  SSH="no"
+  VERB="no"
+  echo_default
+}
 
-read -p "Enter Disk size in GB (default: 8): " DISK_SIZE
-DISK_SIZE=${DISK_SIZE:-8}
+start
+build_container
+description
 
-read -p "Enter Number of CPU cores (default: 2): " CPU_CORES
-CPU_CORES=${CPU_CORES:-2}
-
-read -p "Enter Memory size in MB (default: 1024): " MEMORY
-MEMORY=${MEMORY:-1024}
-
-read -p "Enter Bridge interface (default: vmbr0): " BRIDGE
-BRIDGE=${BRIDGE:-vmbr0}
-
-# Default network values
-DEFAULT_IP="192.168.1.200/24"
-DEFAULT_GATEWAY="192.168.1.1"
-
-read -p "Enter IP address (default: $DEFAULT_IP): " IP_ADDRESS
-IP_ADDRESS=${IP_ADDRESS:-$DEFAULT_IP}
-
-read -p "Enter Gateway (default: $DEFAULT_GATEWAY): " GATEWAY
-GATEWAY=${GATEWAY:-$DEFAULT_GATEWAY}
-
-# Create the container
-echo "Creating container..."
-pct create $CTID $TEMPLATE \
-  -hostname $HOSTNAME \
-  -storage $STORAGE \
-  -rootfs ${STORAGE}:${DISK_SIZE} \
-  -net0 name=eth0,bridge=$BRIDGE,ip=$IP_ADDRESS,gw=$GATEWAY \
-  -cores $CPU_CORES \
-  -memory $MEMORY \
-  -onboot 1
-
-if [ $? -eq 0 ]; then
-  echo "Container $CTID created successfully."
-  echo "Starting container..."
-  pct start $CTID
-  echo "Container $CTID started."
-else
-  echo "Failed to create container."
-  exit 1
-fi
+msg_ok "Completed Successfully!\n"
+echo -e "${APP}${CL} should be reachable by going to the following URL.
+         ${BL}http://${IP}:80${CL} \n"
