@@ -23,7 +23,7 @@ if ! grep -q -m1 'avx[^ ]*' /proc/cpuinfo; then
   exit
 fi
 echo -e "Loading..."
-APP="Unifi"
+APP="Container"
 variables
 color
 catch_errors
@@ -90,5 +90,5 @@ echo "Waiting for container to start..."
 sleep 10
 
 msg_ok "Container created successfully!"
-echo -e "${APP}${CL} should be reachable by going to the following URL.\n"
-echo -e "${BL}https://${IP}:8443${CL} \n"
+echo -e "${APP}${CL} should be reachable by going to the following IP.\n"
+echo -e "${BL}http://${IP}${CL} \n"
