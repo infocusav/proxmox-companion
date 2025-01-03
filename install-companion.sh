@@ -2,9 +2,12 @@
 
 # Variables for container creation
 CTID=1000                    # ID of the container
-VMID=1010                    # VMID for container
 HOSTNAME="companion-container" # Container hostname
 STORAGE="local-lvm"           # Use local-lvm for storage (this is the correct storage for LXC)
+OS_TEMPLATE="debian-12-standard_12.0-1_amd64.tar.gz"  # OS template to use (adjust if needed)
+MEMORY="1024"                 # Memory allocation for the container (1GB)
+CORES="2"                     # Number of CPU cores for the container
+DISK_SIZE="8G"                # Disk size for the container
 
 # Update package list and upgrade installed packages
 echo "Updating package list and upgrading installed packages..."
@@ -20,12 +23,12 @@ curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | b
 
 # Create a Proxmox container
 echo "Creating a Proxmox container with ID $CTID..."
-sudo pct create $CTID local-lvm:vztmpl/debian-12-standard_12.0-1_amd64.tar.gz \
+sudo pct create $CTID $STORAGE:vztmpl/$OS_TEMPLATE \
     -hostname $HOSTNAME \
-    -rootfs $STORAGE:8G \
+    -rootfs $STORAGE:$DISK_SIZE \
     -net0 name=eth0,bridge=vmbr0,ip=dhcp \
-    -memory 1024 \
-    -cores 2 \
+    -memory $MEMORY \
+    -cores $CORES \
     -start 1
 
 # Wait for container to start
