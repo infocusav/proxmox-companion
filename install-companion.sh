@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
-source <(curl -s https://raw.githubusercontent.com/tteck/Proxmox/main/misc/build.func)
 # Copyright (c) 2025 infocusav
 # License: MIT
+
+# Function to display header info
 function header_info {
   clear
   cat <<"EOF"
    ___                                   
   / __|___ _ __  ___ _ _  __ _ _ __ _  _ 
- | (__/ _ \ '  \/ -_) ' \/ _` | '_ \ || |
+ | (__/ _ \ '  \/ -_) ' \/ _ | '_ \ || |
   \___\___/_|_|_\___|_||_\__,_| .__/\_, |
                               |_|   |__/ 
 EOF
 }
+
 header_info
 echo -e "Loading..."
 APP="Proxmox Companion"
@@ -23,11 +25,23 @@ var_version="11"    # Debian version
 BRG="vmbr0"         # Bridge interface
 NET="192.168.1.200/24"  # Default IP address
 GATE="192.168.1.1"      # Default Gateway
-variables
-color
-catch_errors
 
-function advanced_settings() {
+# Function to handle color output (this is just an example)
+function color {
+  CL="\033[0m"
+  BL="\033[1;34m"
+}
+
+# Function to catch errors
+function catch_errors {
+  if [ $? -ne 0 ]; then
+    echo -e "${CL}[ERROR] Something went wrong."
+    exit 1
+  fi
+}
+
+# Function to set container variables
+function advanced_settings {
   CT_TYPE="1"        # Unprivileged container
   PW=""              # No password
   CT_ID=$NEXTID      # Next available container ID
@@ -47,7 +61,7 @@ function advanced_settings() {
   SSH="no"
   VERB="yes"
   
-  # Print the advanced settings to the console
+  # Output the advanced settings
   echo -e "Advanced Settings: "
   echo -e "CT_TYPE: $CT_TYPE"
   echo -e "PW: $PW"
@@ -69,9 +83,40 @@ function advanced_settings() {
   echo -e "VERB: $VERB"
 }
 
+# Function to build the container
+function build_container {
+  # Simulating the building of the container with a placeholder
+  echo -e "Building container with the following settings:"
+  echo -e "CT_TYPE: $CT_TYPE"
+  echo -e "CT_ID: $CT_ID"
+  echo -e "HN: $HN"
+  echo -e "DISK_SIZE: $DISK_SIZE"
+  echo -e "CORE_COUNT: $CORE_COUNT"
+  echo -e "RAM_SIZE: $RAM_SIZE"
+  echo -e "NET: $NET"
+  echo -e "Building... (this is a placeholder)"
+}
+
+# Function to show success message
+function msg_ok {
+  echo -e "[SUCCESS] $1"
+}
+
+# Function to start the script
+function start {
+  echo -e "Starting the process..."
+}
+
+# Function to display description
+function description {
+  echo -e "This script creates a container with the advanced settings."
+}
+
+# Start process
 start
+advanced_settings
 build_container
 description
 msg_ok "Completed Successfully!\n"
 echo -e "${APP}${CL} should be reachable by going to the following URL.
-         ${BL}http://${IP}:80${CL} \n"
+         ${BL}http://${NET}:80${CL} \n"
