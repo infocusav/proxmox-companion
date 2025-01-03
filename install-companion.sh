@@ -28,40 +28,47 @@ pct create $VMID /var/lib/vz/template/cache/debian-11-standard_11.7-1_amd64.tar.
 
 echo "Container $CT_NAME (ID: $VMID) created and started with IP $CT_IP."
 
-# After container creation, install packages and configure the container
+# Ensure the container is running before proceeding
+sleep 5  # Give it a few seconds to fully start
 
-# Start the container
-pct exec $VMID -- bash -c "
+# Run the installation commands in the container
+pct exec $VMID -- bash <<'EOF'
+    # Ensure we are root and have all privileges
+    echo 'Running as root...'
+    whoami
+
     echo 'Updating package lists...'
-    apt-get update -y
+    apt-get update -y || { echo "Failed to update packages."; exit 1; }
 
     echo 'Upgrading installed packages...'
-    apt-get upgrade -y
+    apt-get upgrade -y || { echo "Failed to upgrade packages."; exit 1; }
 
     echo 'Installing sudo and curl...'
-    apt-get install -y sudo curl
+    apt-get install -y sudo curl || { echo "Failed to install sudo or curl."; exit 1; }
 
     # Add user (if not already present)
     if ! id -u $USER &>/dev/null; then
         echo 'Creating user $USER...'
         useradd -m -s /bin/bash $USER
-        echo '$USER:$CT_PASSWORD' | chpasswd
+        echo "$USER:$CT_PASSWORD" | chpasswd
         usermod -aG sudo $USER
+    else
+        echo "User $USER already exists, skipping creation."
     fi
 
     # Install the Companion package
     echo 'Installing Companion...'
-    curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash
+    curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash || { echo "Failed to install Companion."; exit 1; }
 
     # Enable Companion to start on boot
     echo 'Enabling Companion service to start on boot...'
-    sudo systemctl enable companion
+    sudo systemctl enable companion || { echo "Failed to enable Companion service."; exit 1; }
 
     # Verify the Companion service
     echo 'Listing systemd services...'
     sudo systemctl list-unit-files --type=service
 
     echo 'Companion has been installed and set up to start on boot.'
-"
+EOF
 
 echo "Container $CT_NAME (ID: $VMID) has completed all post-creation tasks."
