@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 source <(curl -s https://raw.githubusercontent.com/tteck/Proxmox/main/misc/build.func)
-# Copyright (c) 2025 infocusav
-# License: MIT
 
 function header_info {
   clear
@@ -33,6 +31,14 @@ catch_errors
 # Prompt for MENU value
 read -p "Enter MENU value (default: 'default'): " MENU
 MENU="${MENU:-default}"  # Default to "default" if nothing is entered
+
+# Set template and storage
+STORAGE="local"  # Set to your actual storage (e.g., local, local-lvm)
+TEMPLATE="debian-11-standard_11.0-1_amd64.tar.gz"  # Correct template name
+
+# Download the LXC template
+echo "Downloading LXC template..."
+pveam download $STORAGE $TEMPLATE || { echo "Failed to download template."; exit 1; }
 
 function default_settings() {
   CT_TYPE="1"        # Unprivileged container
