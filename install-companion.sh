@@ -23,8 +23,8 @@ var_ram="1024"      # RAM in MB
 var_os="debian"     # OS template
 var_version="11"    # Debian version
 BRG="vmbr0"         # Bridge interface
-NET="192.168.1.200/24"  # Default IP address
-GATE="192.168.1.1"      # Default Gateway
+NET="dhcp"           # Default DHCP IP configuration
+GATE="192.168.1.1"  # Default Gateway
 
 variables
 color
@@ -38,7 +38,11 @@ function default_settings() {
   DISK_SIZE="$var_disk"
   CORE_COUNT="$var_cpu"
   RAM_SIZE="$var_ram"
-  NET="ip=$NET,gw=$GATE"
+  if [ "$NET" == "dhcp" ]; then
+    NET="ip=dhcp"
+  else
+    NET="ip=192.168.1.200/24,gw=$GATE"
+  fi
   APT_CACHER=""
   APT_CACHER_IP=""
   DISABLEIP6="no"
