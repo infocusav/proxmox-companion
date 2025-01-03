@@ -27,3 +27,35 @@ pct create $VMID /var/lib/vz/template/cache/debian-11-standard_11.7-1_amd64.tar.
     -start 1
 
 echo "Container $CT_NAME (ID: $VMID) created and started with IP $CT_IP."
+
+# After container creation, install packages and configure the container
+
+# Start the container
+pct enter $VMID <<'EOF'
+    # Update package lists
+    apt-get update -y
+
+    # Upgrade all existing packages
+    apt-get upgrade -y
+
+    # Install sudo and curl
+    apt-get install -y sudo curl
+
+    # Add the user (if not already added) for running sudo commands
+    useradd -m -s /bin/bash $USER
+    echo "$USER:$USER_PASSWORD" | chpasswd
+    usermod -aG sudo $USER
+
+    # Install the Companion package
+    curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash
+
+    # Enable Companion to start on boot
+    sudo systemctl enable companion
+
+    # Verify if Companion is installed and running
+    sudo systemctl list-unit-files --type=service
+
+    echo "Companion has been installed and set up to start on boot."
+EOF
+
+echo "Container $CT_NAME (ID: $VMID) has completed all post-creation tasks."
