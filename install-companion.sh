@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if sudo is installed on the host, install if not found
+if ! command -v sudo &> /dev/null; then
+    echo "sudo not found, installing..."
+    apt update && apt install sudo -y
+fi
+
 # Variables for container creation
 CTID=1000                    # ID of the container
 VMID=1010                    # VMID for container
@@ -11,11 +17,6 @@ echo "Updating package list and upgrading installed packages..."
 sudo apt update && sudo apt upgrade -y
 
 # Install curl and sudo on the host if not installed
-if ! command -v sudo &> /dev/null; then
-    echo "sudo not found, installing..."
-    sudo apt install sudo -y
-fi
-
 if ! command -v curl &> /dev/null; then
     echo "curl not found, installing..."
     sudo apt install curl -y
