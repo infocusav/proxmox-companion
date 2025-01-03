@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-
-# Initialize MENU variable
-MENU="default"  # You can change this value based on your needs
-
 source <(curl -s https://raw.githubusercontent.com/tteck/Proxmox/main/misc/build.func)
 # Copyright (c) 2025 infocusav
 # License: MIT
@@ -33,6 +29,10 @@ GATE="192.168.1.1"  # Default Gateway
 variables
 color
 catch_errors
+
+# Prompt for MENU value
+read -p "Enter MENU value (default: 'default'): " MENU
+MENU="${MENU:-default}"  # Default to "default" if nothing is entered
 
 function default_settings() {
   CT_TYPE="1"        # Unprivileged container
