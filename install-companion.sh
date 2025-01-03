@@ -56,23 +56,10 @@ pct exec $VMID -- bash <<'EOF'
     echo 'Updating package lists...'
     apt-get update -y || { echo "Failed to update packages."; exit 1; }
 
-    echo 'Upgrading installed packages...'
-    apt-get upgrade -y || { echo "Failed to upgrade packages."; exit 1; }
-
     echo 'Installing sudo and curl...'
     apt-get install -y sudo curl || { echo "Failed to install sudo or curl."; exit 1; }
 
-    # Add user (if not already present)
-    if ! id -u $USER &>/dev/null; then
-        echo 'Creating user $USER...'
-        useradd -m -s /bin/bash $USER
-        echo "$USER:$CT_PASSWORD" | chpasswd
-        usermod -aG sudo $USER
-    else
-        echo "User $USER already exists, skipping creation."
-    fi
-
-    # Install the Companion package
+    # Install the Companion package without upgrading existing packages
     echo 'Installing Companion...'
     curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash || { echo "Failed to install Companion."; exit 1; }
 
