@@ -37,6 +37,22 @@ pct exec $VMID -- bash <<'EOF'
     echo 'Running as root...'
     whoami
 
+    echo 'Checking DNS configuration...'
+    
+    # Check if DNS is configured correctly
+    if ! grep -q "nameserver" /etc/resolv.conf; then
+        echo 'No nameserver found, adding Google DNS...'
+        echo "nameserver 8.8.8.8" > /etc/resolv.conf
+        echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+    fi
+
+    # Test if the container can reach the internet
+    echo 'Testing network connectivity...'
+    if ! ping -c 4 google.com; then
+        echo "Network connectivity failed. Please check the network settings."
+        exit 1
+    fi
+
     echo 'Updating package lists...'
     apt-get update -y || { echo "Failed to update packages."; exit 1; }
 
