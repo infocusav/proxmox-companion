@@ -16,31 +16,8 @@ if [[ ! "$CT_IP" =~ ^192\.168\.100\.[0-9]+$ ]] || [ "${CT_IP##*.}" -gt 255 ]; th
     exit 1
 fi
 
-# Check if the template exists
-TEMPLATE_PATH="/var/lib/vz/template/cache/debian-11-standard_11.7-1_amd64.tar.gz"
-if [ ! -f "$TEMPLATE_PATH" ]; then
-    echo "Template not found, downloading..."
-    wget http://download.proxmox.com/iso/debian-11-standard_11.7-1_amd64.tar.gz -P /var/lib/vz/template/cache/
-    if [ $? -ne 0 ]; then
-        echo "Failed to download the template. Exiting."
-        exit 1
-    fi
-    echo "Template downloaded successfully."
-fi
-
-# Check if there is enough space in the thin pool
-THIN_POOL_FREE_SPACE=$(vgs --noheadings -o vg_free --units m | awk '{print $1}' | sed 's/M//')
-if [ "$THIN_POOL_FREE_SPACE" -lt 1000 ]; then
-    echo "Warning: Thin pool free space is low ($THIN_POOL_FREE_SPACE MB). Consider increasing the pool size."
-    read -p "Do you want to continue with low space? (y/n): " CONTINUE
-    if [[ "$CONTINUE" != "y" ]]; then
-        echo "Exiting due to low space."
-        exit 1
-    fi
-fi
-
-# Create the container using 'pct' command
-pct create $VMID $TEMPLATE_PATH \
+# Create the container using 'pct' command with the .zst template
+pct create $VMID /var/lib/vz/template/cache/debian-11-standard_11.7-1_amd64.tar.zst \
     -hostname $CT_NAME \
     -rootfs local-lvm:8 \
     -memory 512 \
