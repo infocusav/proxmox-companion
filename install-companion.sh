@@ -29,7 +29,10 @@ MEMORY=${MEMORY:-1024}
 read -p "Enter Bridge interface (default: vmbr0): " BRIDGE
 BRIDGE=${BRIDGE:-vmbr0}
 
-read -p "Enter IP address (e.g. 192.168.1.100/24): " IP_ADDRESS
+# Ensure IP address is provided
+while [[ -z "$IP_ADDRESS" ]]; do
+  read -p "Enter IP address (e.g. 192.168.1.100/24): " IP_ADDRESS
+done
 
 read -p "Enter Gateway (default: 192.168.1.1): " GATEWAY
 GATEWAY=${GATEWAY:-192.168.1.1}
