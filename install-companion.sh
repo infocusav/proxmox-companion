@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# Initialize MENU variable
+MENU="default"  # You can change this value based on your needs
+
 source <(curl -s https://raw.githubusercontent.com/tteck/Proxmox/main/misc/build.func)
 # Copyright (c) 2025 infocusav
 # License: MIT
