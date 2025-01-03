@@ -6,7 +6,7 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
-# Prompt for container details
+# Prompt for container details with defaults
 read -p "Enter Container ID (e.g. 101): " CTID
 read -p "Enter Hostname (default: container${CTID}): " HOSTNAME
 HOSTNAME=${HOSTNAME:-container${CTID}}
@@ -29,13 +29,15 @@ MEMORY=${MEMORY:-1024}
 read -p "Enter Bridge interface (default: vmbr0): " BRIDGE
 BRIDGE=${BRIDGE:-vmbr0}
 
-# Ensure IP address is provided
-while [[ -z "$IP_ADDRESS" ]]; do
-  read -p "Enter IP address (e.g. 192.168.1.100/24): " IP_ADDRESS
-done
+# Default network values
+DEFAULT_IP="192.168.1.200/24"
+DEFAULT_GATEWAY="192.168.1.1"
 
-read -p "Enter Gateway (default: 192.168.1.1): " GATEWAY
-GATEWAY=${GATEWAY:-192.168.1.1}
+read -p "Enter IP address (default: $DEFAULT_IP): " IP_ADDRESS
+IP_ADDRESS=${IP_ADDRESS:-$DEFAULT_IP}
+
+read -p "Enter Gateway (default: $DEFAULT_GATEWAY): " GATEWAY
+GATEWAY=${GATEWAY:-$DEFAULT_GATEWAY}
 
 # Create the container
 echo "Creating container..."
