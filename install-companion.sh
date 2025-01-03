@@ -10,7 +10,7 @@ echo
 VMID=$CT_NUMBER
 CT_IP="192.168.0.${CT_NUMBER}"  # Set to 192.168.0.x range
 
-# Validate IP address format (ensure it falls in the 192.168.1.x range)
+# Validate IP address format (ensure it falls in the 192.168.0.x range)
 if [[ ! "$CT_IP" =~ ^192\.168\.0\.[0-9]+$ ]] || [ "${CT_IP##*.}" -gt 255 ]; then
     echo "Invalid IP address format for $CT_IP. Please ensure the IP is in the range 192.168.0.0-255."
     exit 1
