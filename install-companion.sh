@@ -9,6 +9,13 @@ MEMORY="1024"                 # Memory allocation for the container (1GB)
 CORES="2"                     # Number of CPU cores for the container
 DISK_SIZE="8G"                # Disk size for the container
 
+# Ensure pct is installed and available
+if ! command -v pct &> /dev/null
+then
+    echo "Error: pct command not found. Please install Proxmox utilities."
+    exit 1
+fi
+
 # Update package list and upgrade installed packages
 echo "Updating package list and upgrading installed packages..."
 sudo apt update && sudo apt upgrade -y
@@ -35,11 +42,7 @@ sudo pct create $CTID $STORAGE:vztmpl/$OS_TEMPLATE \
 echo "Waiting for container to start..."
 sleep 10
 
-# Install curl and sudo inside the container
-echo "Installing curl and sudo inside the container..."
-sudo pct exec $CTID -- apt install curl sudo -y
-
-# Install Companion in the container
+# Install Companion inside the container
 echo "Installing Companion inside the container..."
 sudo pct exec $CTID -- bash -c "curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash"
 
