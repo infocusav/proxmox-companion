@@ -11,7 +11,7 @@ VMID=$CT_NUMBER
 CT_IP="192.168.100.${CT_NUMBER}"  # You can customize IP allocation logic
 
 # Create the container using 'pct' command
-pct create $VMID /var/lib/vz/template/cache/debian-11-standard_11.7-1_amd64.tar.gz \
+pct create $VMID /var/lib/vz/template/cache/debian-11-standard_11.7-1_amd64.tar.zst \
     -hostname $CT_NAME \
     -rootfs local-lvm:8 \
     -memory 512 \
