@@ -8,10 +8,16 @@ echo
 
 # Set the configuration for the container
 VMID=$CT_NUMBER
-CT_IP="192.168.100.${CT_NUMBER}"  # You can customize IP allocation logic
+CT_IP="192.168.100.${CT_NUMBER}"  # Simple IP logic based on container number
+
+# Validate IP address format
+if [[ ! "$CT_IP" =~ ^192\.168\.100\.[0-9]+$ ]] || [ "${CT_IP##*.}" -gt 255 ]; then
+    echo "Invalid IP address format for $CT_IP. Please ensure the IP is in the range 192.168.100.0-255."
+    exit 1
+fi
 
 # Create the container using 'pct' command
-pct create $VMID /var/lib/vz/template/cache/debian-11-standard_11.7-1_amd64.tar.zst \
+pct create $VMID /var/lib/vz/template/cache/debian-11-standard_11.3-1_amd64.tar.zst \
     -hostname $CT_NAME \
     -rootfs local-lvm:8 \
     -memory 512 \
