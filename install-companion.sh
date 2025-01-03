@@ -2,17 +2,24 @@
 
 # Variables for container creation
 CTID=1000                    # ID of the container
-VMID=1010                   # VMID for container
+VMID=1010                    # VMID for container
 HOSTNAME="companion-container" # Container hostname
-STORAGE="local"              # Storage for the container's disk
+STORAGE="local"               # Storage for the container's disk
 
 # Update package list and upgrade installed packages
 echo "Updating package list and upgrading installed packages..."
 sudo apt update && sudo apt upgrade -y
 
-# Install curl and sudo
-echo "Installing curl and sudo..."
-sudo apt install curl sudo -y
+# Install curl and sudo on the host if not installed
+if ! command -v sudo &> /dev/null; then
+    echo "sudo not found, installing..."
+    sudo apt install sudo -y
+fi
+
+if ! command -v curl &> /dev/null; then
+    echo "curl not found, installing..."
+    sudo apt install curl -y
+fi
 
 # Install Companion from GitHub
 echo "Installing Companion from GitHub..."
@@ -34,7 +41,13 @@ sleep 10
 
 # Install curl and sudo inside the container
 echo "Installing curl and sudo inside the container..."
+sudo pct exec $CTID -- apt update
 sudo pct exec $CTID -- apt install curl sudo -y
 
-# Install Companion in the container
-echo "Installing Co
+# Install Companion inside the container
+echo "Installing Companion inside the container..."
+sudo pct exec $CTID -- curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash
+
+echo "Companion installation is complete!"
+
+# You can now access Companion via the IP and port 8000.
