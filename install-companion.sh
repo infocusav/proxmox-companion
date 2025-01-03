@@ -31,31 +31,37 @@ echo "Container $CT_NAME (ID: $VMID) created and started with IP $CT_IP."
 # After container creation, install packages and configure the container
 
 # Start the container
-pct enter $VMID <<'EOF'
-    # Update package lists
+pct exec $VMID -- bash -c "
+    echo 'Updating package lists...'
     apt-get update -y
 
-    # Upgrade all existing packages
+    echo 'Upgrading installed packages...'
     apt-get upgrade -y
 
-    # Install sudo and curl
+    echo 'Installing sudo and curl...'
     apt-get install -y sudo curl
 
-    # Add the user (if not already added) for running sudo commands
-    useradd -m -s /bin/bash $USER
-    echo "$USER:$USER_PASSWORD" | chpasswd
-    usermod -aG sudo $USER
+    # Add user (if not already present)
+    if ! id -u $USER &>/dev/null; then
+        echo 'Creating user $USER...'
+        useradd -m -s /bin/bash $USER
+        echo '$USER:$CT_PASSWORD' | chpasswd
+        usermod -aG sudo $USER
+    fi
 
     # Install the Companion package
+    echo 'Installing Companion...'
     curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash
 
     # Enable Companion to start on boot
+    echo 'Enabling Companion service to start on boot...'
     sudo systemctl enable companion
 
-    # Verify if Companion is installed and running
+    # Verify the Companion service
+    echo 'Listing systemd services...'
     sudo systemctl list-unit-files --type=service
 
-    echo "Companion has been installed and set up to start on boot."
-EOF
+    echo 'Companion has been installed and set up to start on boot.'
+"
 
 echo "Container $CT_NAME (ID: $VMID) has completed all post-creation tasks."
