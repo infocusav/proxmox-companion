@@ -8,7 +8,7 @@ echo
 
 # Set the configuration for the container
 VMID=$CT_NUMBER
-CT_IP="192.168.100.${CT_NUMBER}"  # Simple IP logic based on container number
+CT_IP="192.168.1.${CT_NUMBER}"  # Simple IP logic based on container number
 
 # Validate IP address format
 if [[ ! "$CT_IP" =~ ^192\.168\.1\.[0-9]+$ ]] || [ "${CT_IP##*.}" -gt 255 ]; then
