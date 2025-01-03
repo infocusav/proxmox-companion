@@ -46,7 +46,27 @@ function advanced_settings() {
   VLAN="none"
   SSH="no"
   VERB="yes"
-  echo_advanced
+  
+  # Print the advanced settings to the console
+  echo -e "Advanced Settings: "
+  echo -e "CT_TYPE: $CT_TYPE"
+  echo -e "PW: $PW"
+  echo -e "CT_ID: $CT_ID"
+  echo -e "HN: $HN"
+  echo -e "DISK_SIZE: $DISK_SIZE"
+  echo -e "CORE_COUNT: $CORE_COUNT"
+  echo -e "RAM_SIZE: $RAM_SIZE"
+  echo -e "NET: $NET"
+  echo -e "APT_CACHER: $APT_CACHER"
+  echo -e "APT_CACHER_IP: $APT_CACHER_IP"
+  echo -e "DISABLEIP6: $DISABLEIP6"
+  echo -e "MTU: $MTU"
+  echo -e "SD: $SD"
+  echo -e "NS: $NS"
+  echo -e "MAC: $MAC"
+  echo -e "VLAN: $VLAN"
+  echo -e "SSH: $SSH"
+  echo -e "VERB: $VERB"
 }
 
 start
