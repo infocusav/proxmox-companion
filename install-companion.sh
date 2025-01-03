@@ -83,9 +83,8 @@ function advanced_settings {
   echo -e "VERB: $VERB"
 }
 
-# Function to build the container
+# Function to build the container using Proxmox CLI commands
 function build_container {
-  # Simulating the building of the container with a placeholder
   echo -e "Building container with the following settings:"
   echo -e "CT_TYPE: $CT_TYPE"
   echo -e "CT_ID: $CT_ID"
@@ -94,7 +93,19 @@ function build_container {
   echo -e "CORE_COUNT: $CORE_COUNT"
   echo -e "RAM_SIZE: $RAM_SIZE"
   echo -e "NET: $NET"
-  echo -e "Building... (this is a placeholder)"
+  
+  # Proxmox CLI command to create the container
+  # This assumes you have the correct Proxmox CLI commands installed and available
+  pct create $CT_ID /var/lib/vz/template/cache/$var_os-$var_version-template.tar.gz \
+    -hostname $HN -cores $CORE_COUNT -memory $RAM_SIZE -net0 $NET -disk $DISK_SIZE
+  catch_errors
+}
+
+# Function to start the container
+function start_container {
+  echo -e "Starting container $CT_ID..."
+  pct start $CT_ID
+  catch_errors
 }
 
 # Function to show success message
@@ -102,25 +113,25 @@ function msg_ok {
   echo -e "[SUCCESS] $1"
 }
 
-# Function to start the script
-function start {
-  echo -e "Starting the process..."
-}
-
 # Function to display description
 function description {
   echo -e "This script creates a container with the advanced settings."
+}
+
+# Function to open the web interface
+function open_gui {
+  IP="${NET%%/*}"  # Extract the IP part from the network range
+  echo -e "${APP}${CL} should be reachable by going to the following URL."
+  echo -e "${BL}http://$IP:80${CL} \n"
+  # You can add a command to open the web browser automatically, e.g.:
+  # xdg-open http://$IP:80
 }
 
 # Start process
 start
 advanced_settings
 build_container
+start_container
 description
 msg_ok "Completed Successfully!\n"
-
-# Ensure correct IP is displayed for the URL
-IP="${NET%%/*}"  # Extract the IP part from the network range
-
-echo -e "${APP}${CL} should be reachable by going to the following URL.
-         ${BL}http://$IP:80${CL} \n"
+open_gui
