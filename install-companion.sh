@@ -51,34 +51,8 @@ pct exec $VMID -- bash <<'EOF'
     rm -f /tmp/companion-update.tar.gz
 
     # Update package lists with a loading indicator
-    echo -n 'Updating package lists...'
+    echo -n 'Updating package lists... '
     apt-get update -y -o Acquire::http::Pipeline-Depth=0 -o APT::Cache-Limit=100000000 > /dev/null 2>&1
-    echo ' Done.'
+    echo 'Done.'
 
-    # Install only the necessary packages without recommended ones and show progress
-    echo -n 'Installing sudo and curl...'
-    apt-get install -y --no-install-recommends sudo curl > /dev/null 2>&1
-    echo ' Done.'
-
-    # Install the Companion package directly with loading indicator
-    echo -n 'Installing Companion...'
-    curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash > /dev/null 2>&1
-    echo ' Done.'
-
-    # Enable Companion to start on boot
-    echo -n 'Enabling Companion service to start on boot...'
-    sudo systemctl enable companion > /dev/null 2>&1
-    echo ' Done.'
-
-    # Verify the Companion service
-    echo -n 'Verifying Companion service...'
-    sudo systemctl list-unit-files --type=service > /dev/null 2>&1
-    echo ' Done.'
-
-    echo 'Companion has been installed and set up to start on boot.'
-EOF
-
-# Reboot the container after the setup
-pct reboot $VMID
-
-echo "Container $CT_NAME (ID: $VMID) has completed all post-creation tasks and is rebooting now."
+    # Install only the necessary packages without recomm
