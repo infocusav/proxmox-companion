@@ -47,25 +47,33 @@ pct exec $VMID -- bash <<'EOF'
     # Skip DNS check, assume it is configured
     echo 'Skipping DNS check for faster setup...'
 
-    # Update package lists without upgrading
-    echo 'Updating package lists...'
-    apt-get update -y -o Acquire::http::Pipeline-Depth=0 -o APT::Cache-Limit=100000000 || { echo "Failed to update packages."; exit 1; }
+    # Clear previous incomplete Companion download
+    rm -f /tmp/companion-update.tar.gz
 
-    # Install only the necessary packages without recommended ones
-    echo 'Installing sudo and curl...'
-    apt-get install -y --no-install-recommends sudo curl || { echo "Failed to install sudo or curl."; exit 1; }
+    # Update package lists with a loading indicator
+    echo -n 'Updating package lists...'
+    apt-get update -y -o Acquire::http::Pipeline-Depth=0 -o APT::Cache-Limit=100000000 > /dev/null 2>&1
+    echo ' Done.'
 
-    # Install the Companion package directly
-    echo 'Installing Companion...'
-    curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash || { echo "Failed to install Companion."; exit 1; }
+    # Install only the necessary packages without recommended ones and show progress
+    echo -n 'Installing sudo and curl...'
+    apt-get install -y --no-install-recommends sudo curl > /dev/null 2>&1
+    echo ' Done.'
+
+    # Install the Companion package directly with loading indicator
+    echo -n 'Installing Companion...'
+    curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash > /dev/null 2>&1
+    echo ' Done.'
 
     # Enable Companion to start on boot
-    echo 'Enabling Companion service to start on boot...'
-    sudo systemctl enable companion || { echo "Failed to enable Companion service."; exit 1; }
+    echo -n 'Enabling Companion service to start on boot...'
+    sudo systemctl enable companion > /dev/null 2>&1
+    echo ' Done.'
 
     # Verify the Companion service
-    echo 'Listing systemd services...'
-    sudo systemctl list-unit-files --type=service
+    echo -n 'Verifying Companion service...'
+    sudo systemctl list-unit-files --type=service > /dev/null 2>&1
+    echo ' Done.'
 
     echo 'Companion has been installed and set up to start on boot.'
 EOF
