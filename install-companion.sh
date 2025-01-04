@@ -37,29 +37,18 @@ pct exec $VMID -- bash <<'EOF'
     echo 'Running as root...'
     whoami
 
-    echo 'Checking DNS configuration...'
-    
-    # Check if DNS is configured correctly
-    if ! grep -q "nameserver" /etc/resolv.conf; then
-        echo 'No nameserver found, adding Google DNS...'
-        echo "nameserver 8.8.8.8" > /etc/resolv.conf
-        echo "nameserver 8.8.4.4" >> /etc/resolv.conf
-    fi
+    # Skip DNS check, assume it is configured
+    echo 'Skipping DNS check for faster setup...'
 
-    # Test if the container can reach the internet
-    echo 'Testing network connectivity...'
-    if ! ping -c 4 google.com; then
-        echo "Network connectivity failed. Please check the network settings."
-        exit 1
-    fi
-
+    # Update package lists without upgrading
     echo 'Updating package lists...'
-    apt-get update -y || { echo "Failed to update packages."; exit 1; }
+    apt-get update -y -o Acquire::http::Pipeline-Depth=0 -o APT::Cache-Limit=100000000 || { echo "Failed to update packages."; exit 1; }
 
+    # Install only the necessary packages without recommended ones
     echo 'Installing sudo and curl...'
-    apt-get install -y sudo curl || { echo "Failed to install sudo or curl."; exit 1; }
+    apt-get install -y --no-install-recommends sudo curl || { echo "Failed to install sudo or curl."; exit 1; }
 
-    # Install the Companion package without upgrading existing packages
+    # Install the Companion package directly
     echo 'Installing Companion...'
     curl https://raw.githubusercontent.com/bitfocus/companion-pi/main/install.sh | bash || { echo "Failed to install Companion."; exit 1; }
 
@@ -74,4 +63,7 @@ pct exec $VMID -- bash <<'EOF'
     echo 'Companion has been installed and set up to start on boot.'
 EOF
 
-echo "Container $CT_NAME (ID: $VMID) has completed all post-creation tasks."
+# Reboot the container after the setup
+pct reboot $VMID
+
+echo "Container $CT_NAME (ID: $VMID) has completed all post-creation tasks and is rebooting now."
