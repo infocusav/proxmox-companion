@@ -11,6 +11,6 @@ run the following command withing the >_ Shell
 </code>
 </pre>
 
-<button onclick="navigator.clipboard.writeText('This is the text you want to be copied.');">Copy</button>
+
 
 
