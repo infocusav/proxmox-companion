@@ -69,13 +69,26 @@ TPL_STORAGE=$(pvesm status -content vztmpl 2>/dev/null | awk 'NR>1 && $3=="activ
 HOST_ARCH=$(dpkg --print-architecture 2>/dev/null || true)
 [ -n "$HOST_ARCH" ] || HOST_ARCH=amd64
 
-# Reuse an already-downloaded Debian template if present, newest first.
-TEMPLATE=$(pveam list "$TPL_STORAGE" 2>/dev/null | awk -v a="$HOST_ARCH" '$1 ~ /debian-.*-standard/ && index($1, "_" a ".") > 0 {print $1}' | sort -V | tail -n1 || true)
+# The Companion installer targets bookworm-era Debian, so prefer 12 and only
+# fall back to the newest release on offer. Override with PREFERRED_DEBIAN=13.
+PREFERRED_DEBIAN="${PREFERRED_DEBIAN:-12}"
+
+# Newest entry matching the preferred release, else newest overall.
+pick_template() {
+    local list pick
+    list=$(cat)
+    pick=$(echo "$list" | grep -- "debian-${PREFERRED_DEBIAN}-standard" | sort -V | tail -n1 || true)
+    [ -n "$pick" ] || pick=$(echo "$list" | sort -V | tail -n1 || true)
+    echo "$pick"
+}
+
+# Reuse an already-downloaded Debian template if present.
+TEMPLATE=$(pveam list "$TPL_STORAGE" 2>/dev/null | awk -v a="$HOST_ARCH" '$1 ~ /debian-.*-standard/ && index($1, "_" a ".") > 0 {print $1}' | pick_template || true)
 
 if [ -z "$TEMPLATE" ]; then
     echo "No Debian $HOST_ARCH template found on $TPL_STORAGE. Downloading..."
     pveam update >/dev/null 2>&1 || true
-    TPL_NAME=$(pveam available --section system 2>/dev/null | awk -v a="$HOST_ARCH" '$2 ~ /debian-.*-standard/ && index($2, "_" a ".") > 0 {print $2}' | sort -V | tail -n1 || true)
+    TPL_NAME=$(pveam available --section system 2>/dev/null | awk -v a="$HOST_ARCH" '$2 ~ /debian-.*-standard/ && index($2, "_" a ".") > 0 {print $2}' | pick_template || true)
     [ -n "$TPL_NAME" ] || die "Could not find a Debian $HOST_ARCH standard template in the appliance list."
     pveam download "$TPL_STORAGE" "$TPL_NAME" || die "Failed to download template $TPL_NAME."
     TEMPLATE="$TPL_STORAGE:vztmpl/$TPL_NAME"
