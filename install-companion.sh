@@ -18,24 +18,44 @@ read -sp "Enter password for the container: " CT_PASSWORD
 echo
 [ ${#CT_PASSWORD} -ge 5 ] || die "Password must be at least 5 characters."
 
+read -sp "Confirm password for the container: " CT_PASSWORD_CONFIRM
+echo
+[ "$CT_PASSWORD" = "$CT_PASSWORD_CONFIRM" ] || die "Passwords do not match."
+
+read -p "Enter VLAN tag (leave blank for none): " CT_VLAN
+if [ -n "$CT_VLAN" ]; then
+    [[ "$CT_VLAN" =~ ^[0-9]+$ ]] && [ "$CT_VLAN" -ge 1 ] && [ "$CT_VLAN" -le 4094 ] || die "VLAN tag must be a number between 1 and 4094."
+    VLAN_CONFIG=",tag=$CT_VLAN"
+else
+    VLAN_CONFIG=""
+fi
+
 read -p "Use DHCP for networking? (y/n): " USE_DHCP
 
 if [[ "$USE_DHCP" =~ ^[Yy]$ ]]; then
-    NET_CONFIG="name=eth0,bridge=vmbr0,ip=dhcp"
+    NET_CONFIG="name=eth0,bridge=vmbr0,ip=dhcp$VLAN_CONFIG"
 else
-    read -p "Enter the container IP address (e.g., 10.0.0.50): " CT_IP
+    read -p "Enter the container IP address with CIDR subnet mask (e.g., 10.0.0.50/24): " CT_IP_CIDR
     read -p "Enter the gateway IP address (e.g., 10.0.0.1): " CT_GATEWAY
 
-    # Basic IP address validation (less restrictive than before)
-    if [[ ! "$CT_IP" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || [ "${CT_IP##*.}" -gt 255 ]; then
-        die "Invalid IP address format for $CT_IP."
+    # Validate IP/CIDR format, e.g. 10.0.0.50/24
+    if [[ ! "$CT_IP_CIDR" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$ ]]; then
+        die "Invalid IP address format for $CT_IP_CIDR. Expected format: X.X.X.X/CIDR (e.g., 10.0.0.50/24)."
     fi
+
+    CT_IP="${CT_IP_CIDR%/*}"
+    CT_PREFIX="${CT_IP_CIDR#*/}"
+
+    for octet in ${CT_IP//./ }; do
+        [ "$octet" -le 255 ] || die "Invalid IP address format for $CT_IP_CIDR."
+    done
+    [ "$CT_PREFIX" -ge 0 ] && [ "$CT_PREFIX" -le 32 ] || die "Invalid CIDR prefix /$CT_PREFIX. Must be between 0 and 32."
 
     if [[ ! "$CT_GATEWAY" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] || [ "${CT_GATEWAY##*.}" -gt 255 ]; then
         die "Invalid gateway IP address format for $CT_GATEWAY."
     fi
 
-    NET_CONFIG="name=eth0,bridge=vmbr0,ip=$CT_IP/24,gw=$CT_GATEWAY"
+    NET_CONFIG="name=eth0,bridge=vmbr0,ip=$CT_IP_CIDR,gw=$CT_GATEWAY$VLAN_CONFIG"
 fi
 
 VMID=$CT_NUMBER
