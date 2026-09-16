@@ -11,10 +11,28 @@ No manual template download is required.
 
 ## Usage
 
-Run the following command within the Proxmox `>_ Shell` and follow the prompts for container number, name, password, and network configuration (DHCP or a static IP/gateway):
+Run the following command within the Proxmox `>_ Shell` and follow the prompts for container number, name, password (entered twice to confirm), VLAN tag (optional), and network configuration (DHCP or a static IP/gateway in CIDR notation):
 
 <pre>
 <code>bash -c "$(wget -qLO - https://raw.githubusercontent.com/infocusav/proxmox-companion/main/install-companion.sh)"
+</code>
+</pre>
+
+### Example session
+
+<pre>
+<code>Enter container number (e.g., 100): 105
+Enter container name: companion-01
+Enter password for the container: ********
+Confirm password for the container: ********
+Enter VLAN tag (leave blank for none): 20
+Use DHCP for networking? (y/n): n
+Enter the container IP address with CIDR subnet mask (e.g., 10.0.0.50/24): 10.0.20.50/24
+Enter the gateway IP address (e.g., 10.0.0.1): 10.0.20.1
+Available rootfs storages: local-lvm local
+Storage to use [local-lvm]: 
+Using storage: local-lvm
+Using template: local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst
 </code>
 </pre>
 
